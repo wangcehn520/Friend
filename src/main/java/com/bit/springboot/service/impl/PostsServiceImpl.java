@@ -91,7 +91,7 @@ public class PostsServiceImpl  extends ServiceImpl<PostsMapper, Posts> implement
             }
             PostsDataVO postsDataVO = new PostsDataVO();
             BeanUtils.copyProperties(posts,postsDataVO);
-            Boolean like = like(posts, request);
+            Boolean like = like(posts.getId(), request);
             postsDataVO.setIsLike(like);
             friendsId.stream().forEach(id -> stringRedisTemplate.opsForList().leftPush(UserConstant.GET_POSTS_kEY + id,JSONUtil.toJsonStr(postsDataVO)));
             stringRedisTemplate.opsForList().leftPush(UserConstant.GET_POSTS_kEY + user.getId() ,JSONUtil.toJsonStr(postsDataVO));
@@ -107,9 +107,7 @@ public class PostsServiceImpl  extends ServiceImpl<PostsMapper, Posts> implement
             List<String> list = stringRedisTemplate.opsForList().range("postsList", 0, -1);
            return list.stream().map(posts ->{
                 PostsDataVO postsDataVO = JSONUtil.toBean(posts, PostsDataVO.class);
-                Posts posts1 = new Posts();
-                BeanUtils.copyProperties(posts,posts1);
-                postsDataVO.setIsLike(like(posts1,request));
+                postsDataVO.setIsLike(like(postsDataVO.getId(),request));
                 return postsDataVO;
             }).collect(Collectors.toList());
         }
@@ -120,10 +118,9 @@ public class PostsServiceImpl  extends ServiceImpl<PostsMapper, Posts> implement
         list.stream().sorted((p1, p2) -> {
             return p2.getCreateTime().compareTo(p1.getCreateTime());
         }).forEach(posts -> {
-            User user = userService.getById(posts.getUserId());
             PostsDataVO postsDataVO = new PostsDataVO();
             BeanUtils.copyProperties(posts,postsDataVO);
-            postsDataVO.setIsLike(like(posts,request));
+            postsDataVO.setIsLike(like(posts.getId(),request));
             stringRedisTemplate.opsForList().rightPush("postsList", JSONUtil.toJsonStr(postsDataVO));
             finalResultList.add(postsDataVO);
         });
@@ -151,6 +148,7 @@ public class PostsServiceImpl  extends ServiceImpl<PostsMapper, Posts> implement
                 }
             }
         }
+        stringRedisTemplate.delete("postsList");
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -205,10 +203,9 @@ public class PostsServiceImpl  extends ServiceImpl<PostsMapper, Posts> implement
         return result;
     }
 
-    private Boolean like(Posts posts, HttpServletRequest request) {
+    private Boolean like(Long postsId, HttpServletRequest request) {
         User user = (User) request.getSession().getAttribute(UserConstant.USER_LOGIN_STATE);
-        Long id = posts.getId();
-        String key = "post_like_key:" + id;
+        String key = "post_like_key:" + postsId;
         if (user == null){
             return false;
         }
