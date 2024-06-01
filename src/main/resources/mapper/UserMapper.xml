@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bit.springboot.mapper.UserMapper">
+    <update id="updateUser" parameterType="com.bit.springboot.model.entity.User">
+        update user
+        <set>
+            <if test="username!=null">
+                userName=#{username},
+            </if>
+            <if test="avatarUrl!=null">
+                avatarUrl=#{avatarUrl},
+            </if>
+            <if test="gender!=null">
+                gender=#{gender},
+            </if>
+            <if test="phone!=null">
+                phone=#{phone},
+            </if>
+            <if test="email!=null">
+                email=#{email},
+            </if>
+            <if test="updateTime!=null">
+                updateTime=#{updateTime},
+            </if>
+            <if test="tags!=null">
+                tags=#{tags},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+    <select id="getByUserAccount" resultType="java.lang.Integer">
+        select count(*) from user where userAccount = #{userAccount}
+    </select>
+</mapper>

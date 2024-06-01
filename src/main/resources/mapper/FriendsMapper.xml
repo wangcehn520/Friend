@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bit.springboot.mapper.FriendsMapper">
+    <select id="searchFriendsList" resultType="com.bit.springboot.model.entity.Friends">
+        select * from friends
+        where
+        userId = #{id}
+    </select>
+    <select id="searchFriends" resultType="com.bit.springboot.model.entity.Friends">
+        select * from friends
+        where
+            userId = #{userId} and friendId = #{friendId} and isDelete = 0
+    </select>    <select id="searchFriend" resultType="com.bit.springboot.model.entity.Friends">
+        select * from friends
+        where
+            userId = #{friendId} and friendId = #{userId} and isDelete = 0
+    </select>
+    <select id="getFriendsId" resultType="java.lang.Long" parameterType="java.lang.Long">
+        select friendId from friends
+        where
+            userId = #{userId}
+    </select>
+</mapper>
